@@ -11,7 +11,7 @@ import json
 load_dotenv()
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = os.getenv_("SECRET_KEY")
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 CORS(app, origins="*")
 
 
