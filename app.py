@@ -12,11 +12,11 @@ load_dotenv()
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
-CORS(app, origins="*")
+CORS(app, origins ="*")
 
 
-ADM_USUARIO = os.getenv_("ADM_USUARIO")
-ADM_SENHA = os.getenv_("ADM_SENHA")
+ADM_USUARIO = os.getenv("ADM_USUARIO")
+ADM_SENHA = os.getenv("ADM_SENHA")
 
 
 if os.getenv("VERCEL"):
@@ -26,7 +26,6 @@ else:
     # Carregar credenciais do Firebase
     cred = credentials.Certificate("firebase.json")
     # Buy a compiuter dude!(╬▔皿▔)╯
-
 
 firebase_admin.initialize_app(cred)
 
