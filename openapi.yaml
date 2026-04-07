@@ -32,8 +32,11 @@ components:
           example: "O café."
 
 paths:
+  # --- ROTAS PÚBLICAS ---
   /:
     get:
+      tags:
+        - Public
       summary: Rota de boas-vindas
       responses:
         '200':
@@ -47,6 +50,8 @@ paths:
 
   /login:
     post:
+      tags:
+        - Public
       summary: Realiza login para obter o token
       requestBody:
         required: true
@@ -67,6 +72,8 @@ paths:
 
   /charadas:
     get:
+      tags:
+        - Public
       summary: Lista todas as charadas
       responses:
         '200':
@@ -77,7 +84,41 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Charada'
+
+  /charadas/random:
+    get:
+      tags:
+        - Public
+      summary: Retorna uma charada aleatória
+      responses:
+        '200':
+          description: Uma charada aleatória
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Charada'
+
+  /charadas/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      tags:
+        - Public
+      summary: Busca charada por ID
+      responses:
+        '200':
+          description: Detalhes da charada
+        '404':
+          description: Não encontrada
+
+  # --- ROTAS PRIVADAS ---
     post:
+      tags:
+        - Private
       summary: Cria uma nova charada
       security:
         - bearerAuth: []
@@ -99,32 +140,9 @@ paths:
         '201':
           description: Charada criada com sucesso
 
-  /charadas/random:
-    get:
-      summary: Retorna uma charada aleatória
-      responses:
-        '200':
-          description: Uma charada aleatória
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Charada'
-
-  /charadas/{id}:
-    parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: integer
-    get:
-      summary: Busca charada por ID
-      responses:
-        '200':
-          description: Detalhes da charada
-        '404':
-          description: Não encontrada
     put:
+      tags:
+        - Private
       summary: Atualiza totalmente uma charada
       security:
         - bearerAuth: []
@@ -145,7 +163,10 @@ paths:
       responses:
         '200':
           description: Atualizada com sucesso
+
     patch:
+      tags:
+        - Private
       summary: Atualiza parcialmente uma charada
       security:
         - bearerAuth: []
@@ -162,7 +183,10 @@ paths:
       responses:
         '200':
           description: Atualizada com sucesso
+
     delete:
+      tags:
+        - Private
       summary: Exclui uma charada
       security:
         - bearerAuth: []
