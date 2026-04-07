@@ -1,7 +1,7 @@
 
 # Charafun API
 
-API de charadas (vingança dos enigmas) desenvolvida em Flask com Firestore e deploy na Vercel.
+API de charadas (baseado em helldivers) desenvolvida em Flask com Firestore e deploy na Vercel.
 
 - URL pública: https://charafun.vercel.app/
 - Backend: `app.py`
