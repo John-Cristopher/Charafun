@@ -1,0 +1,171 @@
+openapi: 3.0.0
+info:
+  title: CharaFun API
+  description: API de charadas com integração Firebase e autenticação via Token.
+  version: 1.0.0
+  contact:
+    name: J. Cristopher
+
+servers:
+  - url: http://localhost:5000
+    description: Servidor Local
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Charada:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        pergunta:
+          type: string
+          example: "O que é, o que é..."
+        resposta:
+          type: string
+          example: "O café."
+
+paths:
+  /:
+    get:
+      summary: Rota de boas-vindas
+      responses:
+        '200':
+          description: Informações básicas da API
+          content:
+            application/json:
+              example:
+                api: "charafun"
+                Version: "1.0"
+                Author: "J. Cristopher"
+
+  /login:
+    post:
+      summary: Realiza login para obter o token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                usuario:
+                  type: string
+                senha:
+                  type: string
+      responses:
+        '200':
+          description: Login bem-sucedido
+        '401':
+          description: Credenciais inválidas
+
+  /charadas:
+    get:
+      summary: Lista todas as charadas
+      responses:
+        '200':
+          description: Uma lista de charadas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Charada'
+    post:
+      summary: Cria uma nova charada
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - pergunta
+                - resposta
+              properties:
+                pergunta:
+                  type: string
+                resposta:
+                  type: string
+      responses:
+        '201':
+          description: Charada criada com sucesso
+
+  /charadas/random:
+    get:
+      summary: Retorna uma charada aleatória
+      responses:
+        '200':
+          description: Uma charada aleatória
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Charada'
+
+  /charadas/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      summary: Busca charada por ID
+      responses:
+        '200':
+          description: Detalhes da charada
+        '404':
+          description: Não encontrada
+    put:
+      summary: Atualiza totalmente uma charada
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - pergunta
+                - resposta
+              properties:
+                pergunta:
+                  type: string
+                resposta:
+                  type: string
+      responses:
+        '200':
+          description: Atualizada com sucesso
+    patch:
+      summary: Atualiza parcialmente uma charada
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                pergunta:
+                  type: string
+                resposta:
+                  type: string
+      responses:
+        '200':
+          description: Atualizada com sucesso
+    delete:
+      summary: Exclui uma charada
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Excluída com sucesso

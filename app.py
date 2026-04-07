@@ -7,12 +7,16 @@ from flask_cors import CORS
 import os
 from dotenv import load_dotenv
 import json
+from flasgger import Swagger
 
 load_dotenv()
 
 app = Flask(__name__)
+app.config["SWAGGER"] = {"openapi": "3.0.0"}
+# Chamar o OPENAPI para código
+swaggger = Swagger(app, template_file='openapi.yaml')
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
-CORS(app, origins ="*")
+CORS(app, origins="*")
 
 
 ADM_USUARIO = os.getenv("ADM_USUARIO")
