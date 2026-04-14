@@ -14,9 +14,13 @@ load_dotenv()
 app = Flask(__name__)
 app.config["SWAGGER"] = {"openapi": "3.0.0"}
 # Chamar o OPENAPI para código
-swaggger = Swagger(app, template_file='openapi.yaml')
+swagger = Swagger(
+    app, template_file="openapi.yaml"
+)  # Corrigido typo: swaggger -> swagger
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 CORS(app, origins="*")
+# NOTA: Para um ambiente de produção, considere restringir 'origins' a domínios específicos
+# em vez de usar "*", por questões de segurança.
 
 
 ADM_USUARIO = os.getenv("ADM_USUARIO")
@@ -24,6 +28,9 @@ ADM_SENHA = os.getenv("ADM_SENHA")
 
 
 if os.getenv("VERCEL"):
+    # NOTA: Para um ambiente de produção, considere usar um sistema de gerenciamento de usuários mais robusto
+    # com senhas hash (ex: bcrypt) e armazenamento em banco de dados, em vez de variáveis de ambiente.
+
     # ONLINE NA VERCEL
     cred = credentials.Certificate(json.loads(os.getenv("FIREBASE_CREDENTIALS")))
 else:
@@ -63,6 +70,9 @@ def login():
     if usuario == ADM_USUARIO and senha == ADM_SENHA:
         token = gerar_token(usuario)
         return jsonify({"message": "Login realizado com sucesso!", "token": token}), 200
+    # NOTA: Em produção, evite retornar mensagens de erro que revelem qual credencial está incorreta
+    # (ex: "Usuário inválido" vs "Senha inválida"). Uma mensagem genérica como "Credenciais inválidas"
+    # é mais segura contra ataques de força bruta.
     return jsonify({"error": "Usuário ou senha inválidos!"}), 401
 
 
@@ -130,7 +140,9 @@ def post_charadas():
             }
         )
         return jsonify({"message": "Charada criada com sucesso!"}), 201
-    except:
+    except (
+        Exception
+    ) as e:  # Captura exceções mais específicas ou loga 'e' para depuração
         return jsonify({"error": "Falha no envio da charada"}), 400
 
 
@@ -146,15 +158,18 @@ def charadas_put(id):
 
     try:
         docs = db.collection("charadas").where("id", "==", id).limit(1).get()
-        if not docs:
+        if docs.empty:  # Correção: Usar .empty para verificar QuerySnapshot vazio
             return jsonify({"error": "Charada não encontrada"}), 404
         for doc in docs:
             doc_ref = db.collection("charadas").document(doc.id)
+            # Removido "id": id, pois o ID do documento não deve ser alterado e já é usado na query.
             doc_ref.update(
-                {"id": id, "pergunta": dados["pergunta"], "resposta": dados["resposta"]}
+                {"pergunta": dados["pergunta"], "resposta": dados["resposta"]}
             )
         return jsonify({"message": "Charada alterada com sucesso"}), 200
-    except:
+    except (
+        Exception
+    ) as e:  # Captura exceções mais específicas ou loga 'e' para depuração
         return jsonify({"error": "Falha no envio da charada"}), 400
 
 
@@ -180,14 +195,16 @@ def charadas_patch(id):
     try:
         docs = db.collection("charadas").where("id", "==", id).limit(1).get()
 
-        if not docs:
+        if docs.empty:  # Correção: Usar .empty para verificar QuerySnapshot vazio
             return jsonify({"error": "Charada não encontrada"}), 404
 
         for doc in docs:
             doc_ref = db.collection("charadas").document(doc.id)
             doc_ref.update(dado_para_atualizar)
         return jsonify({"message": "Charada alterada com sucesso"}), 200
-    except:
+    except (
+        Exception
+    ) as e:  # Captura exceções mais específicas ou loga 'e' para depuração
         return jsonify({"error": "Falha no envio da charada"}), 400
 
 
@@ -197,7 +214,7 @@ def charadas_patch(id):
 def delete_charada(id):
 
     docs = db.collection("charadas").where("id", "==", id).limit(1).get()
-    if not docs:
+    if docs.empty:  # Correção: Usar .empty para verificar QuerySnapshot vazio
         return jsonify({"error": "Charada não encontrada!"}), 404
 
     doc_ref = db.collection("charadas").document(docs[0].id)
